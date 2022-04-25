@@ -1,19 +1,19 @@
 *** Show summary statistics
 *** Author: Martin Wiegand
-*** Last changed: 24.10.2020
+*** Last changed: 25.04.2022
 
 
 
 // set global
 clear
 set more off
-global Progresa "Directory\Progresa" // change this to Progresa directory
+global Intermediate "Directory\Progresa\Intermediate data" // change "Directory" to Progresa directory
 set seed 12345
 
 // summary statistics for conditional unrestricted sample; the bootstrap is
 // to obtain the correct p-value (Wild cluster bootstrap)
 
-use "$Progresa\Highschool_big.dta", clear
+use "$Intermediate\Highschool_big.dta", clear
 
 // eligible (poor)
 ttest highschool if pobre, by(treatment)
@@ -46,7 +46,7 @@ boottest treatment, cluster(claveofi) weighttype(mammen) reps(99999)
 // summary statistics for conditional restricted sample; the bootstrap is
 // to obtain the correct p-value (Wild cluster bootstrap)
 
-use "$Progresa\Highschool_small.dta", clear
+use "$Intermediate\Highschool_small.dta", clear
 
 // eligible (poor)
 ttest highschool if pobre, by(treatment)
@@ -79,7 +79,7 @@ boottest treatment, cluster(claveofi) weighttype(mammen) reps(99999)
 // summary statistics for unconditional sample; the bootstrap is
 // to obtain the correct p-value (Wild cluster bootstrap)
 
-use "$Progresa\Unconditional.dta", clear
+use "$Intermediate\Unconditional.dta", clear
 
 // eligible (poor)
 ttest highschool if pobre, by(treatment)

@@ -1,7 +1,7 @@
 *** Merge different survey rounds, define relevant variables, and construct
 *** datasets for analysis in R
 *** Author: Martin Wiegand
-*** Last changed: 24.10.2020
+*** Last changed: 25.04.2022
 
 
 
@@ -10,19 +10,20 @@
 // set global
 clear
 set more off
-global Progresa "Directory\Progresa" // change this to Progresa directory
+global Raw "Directory\Progresa\Raw data" // change "Directory" to Progresa directory
+global Intermediate "Directory\Progresa\Intermediate data" // change "Directory" to Progresa directory
 
-use "$Progresa\1999\socioec_encel_99n.dta", clear // November 1999 survey
+use "$Raw\1999\socioec_encel_99n.dta", clear // November 1999 survey
 drop if renglon == .
 keep folio renglon n002 n039 n041a n041b n042 // n039: currently going to school, n041a n041b: highest completed level of schooling, n002: age, n042: number of years repeated; current level of schooling is missing
 tempfile temp99n
 save `temp99n'
-use "$Progresa\2000\socioec_encel2000m.dta", clear // March 2000 survey
+use "$Raw\2000\socioec_encel2000m.dta", clear // March 2000 survey
 drop if renglon == .
 keep folio renglon z35 z2creada // z2creada: age, z35: person went to school in school year 99/00; there is no variable indicating current school year or highest completed grade
 tempfile temp00m
 save `temp00m'
-use "$Progresa\2000\socioec_encel_2000n.dta", clear // November 2000 survey
+use "$Raw\2000\socioec_encel_2000n.dta", clear // November 2000 survey
 drop if renglon == .
 rename contba treatment2000n
 * Generate pc expenditure variable
@@ -88,7 +89,7 @@ save `temp00n'
 
 // prepare 1998 predictors
 
-use "$Progresa\1998\socioec_encel_98m_Stata12.dta", clear
+use "$Raw\1998\socioec_encel_98m_Stata12.dta", clear
 
 gen goodatschool = p009 == 1 if p009 != 0 & p009 != 7 & p009 != 9 & p009 != . // student is good at school
 gen cansec = p011 >= 2 & p011 <=6 if p011 != 0 & p011 != 7 & p011 != 9 // can go to secondary or higher
@@ -178,7 +179,7 @@ save `temp98m'
 
 // prepare 1997 predictors
 
-use "$Progresa\1997\ENCASEH 97_CALIF ORIG Y 2003_Stata12.dta", clear
+use "$Raw\1997\ENCASEH 97_CALIF ORIG Y 2003_Stata12.dta", clear
 
 bysort claveofi: egen vilcount = count(claveofi)
 bysort claveofi: egen inter = count(claveofi) if pobre
@@ -338,7 +339,7 @@ merge 1:1 folio renglon using `temp00m'
 rename _merge merge00m
 merge 1:1 folio renglon using `temp00n'
 rename _merge merge00n
-merge n:1 entidad mpio local using "$Progresa\location"
+merge n:1 entidad mpio local using "$Intermediate\location"
 rename _merge mergeloc
 
 // prepare some more predictor variables
@@ -353,13 +354,13 @@ rename p07 hhsize97
 
 // merge with 2003 dataset
 rename hogares hogar
-merge 1:1 folio hogar renglon using "$Progresa\2003\bd_rur_2003_socioeconomico_personas_Stata12.dta", keepusing(s2_4 s3_4 s3_1_1 s3_1_2 s3_1_3 s3_12_1 s3_12_2 s5_25_2 s5_25_1 s5_30_1 s5_30_2 s5_34 s5_35_1 s5_35_2 s5_5_1 s5_5_2 hog_nue fase_in anio_inc bim_inc tipo res_fin)
+merge 1:1 folio hogar renglon using "$Raw\2003\bd_rur_2003_socioeconomico_personas_Stata12.dta", keepusing(s2_4 s3_4 s3_1_1 s3_1_2 s3_1_3 s3_12_1 s3_12_2 s5_25_2 s5_25_1 s5_30_1 s5_30_2 s5_34 s5_35_1 s5_35_2 s5_5_1 s5_5_2 hog_nue fase_in anio_inc bim_inc tipo res_fin)
 drop if _merge == 2
 rename _merge merge03
 
 gen treatment = contba == 1
 
-save "$Progresa\Big Dataset", replace
+save "$Intermediate\Big Dataset", replace
 
 // exit
 
@@ -370,7 +371,7 @@ save "$Progresa\Big Dataset", replace
 
 
 // Make conditional sample
-use "$Progresa\Big Dataset", clear
+use "$Intermediate\Big Dataset", clear
 keep if w041a == 3 & w041b == 3 & n039 == 1 & z35 == 1 // keep only those who were in last year of secondary school by the end of school year 99/00
 
 gen agedif = w002cor - w046 if w046 <= 50 // age difference between current age and age when quit school
@@ -411,7 +412,7 @@ gen moneyreason = w045 == 1 | w045 == 2 | w045 == 3 // reason for not continuing
 gen otherreason = moneyreason != 1 & highschool != 1 // reason for not continuing school was not money-related
 gen missing03 = highschool03 == . if highschool != . // missing outcomes from 2003 survey
 
-save "$Progresa\Highschool_big.dta", replace
+save "$Intermediate\Highschool_big.dta", replace
 
 // export to csv (for analysis with R)
 global features97 "female age97 attend97 attend98 hhsize97 numunder15 fatherathome motherathome fatherlit motherlit fatherschool motherschool fatherminprim motherminprim fatherminsec motherminsec fatherminhigh motherminhigh verypoor poor notrich yycali mpcalif"
@@ -422,15 +423,15 @@ global outcomes "highschool highschool03 highschool03fin moneyreason otherreason
 keep treatment pobre $outcomes $features97 $features98m $locationfeatures $schoolfeatures
 drop fatherminhigh motherminhigh spendmoreon8 spendmoreon9 spendmoreon10 spendmoreon13 mayor cattlecommittee creditunion conscoop allsewers posttelegraph allgetinpreschool allgetinprimschool allgetintelesecondaria numbersecondary allgetinsecundary // drop these for lack of variation
 
-export delimited using "$Progresa\Highschool_big.csv", replace
+export delimited using "$Intermediate\Highschool_big.csv", replace
 
 
 
 
 // restricted conditional sample
-use "$Progresa\Highschool_big.dta", clear
+use "$Intermediate\Highschool_big.dta", clear
 keep if n041b == 3 & n041a == 2 // remove asterisk to get restricted sample
-save "$Progresa\Highschool_small.dta", replace
+save "$Intermediate\Highschool_small.dta", replace
 
 // export to csv (for analysis with R)
 global features97 "female age97 attend97 attend98 hhsize97 numunder15 fatherathome motherathome fatherlit motherlit fatherschool motherschool fatherminprim motherminprim fatherminsec motherminsec fatherminhigh motherminhigh verypoor poor notrich yycali mpcalif"
@@ -441,13 +442,13 @@ global outcomes "highschool highschool03 highschool03fin moneyreason otherreason
 keep treatment pobre $outcomes $features97 $features98m $locationfeatures $schoolfeatures
 drop fatherminhigh motherminhigh spendmoreon8 spendmoreon9 spendmoreon10 spendmoreon13 mayor cattlecommittee creditunion conscoop allsewers posttelegraph allgetinpreschool allgetinprimschool allgetintelesecondaria numbersecondary allgetinsecundary // drop these for lack of variation
 
-export delimited using "$Progresa\Highschool_small.csv", replace
+export delimited using "$Intermediate\Highschool_small.csv", replace
 
 
 
 
 // Make unconditional sample
-use "$Progresa\Big Dataset", clear
+use "$Intermediate\Big Dataset", clear
 gen agedif = w002cor - w046 if w046 <= 50 // age difference between current age and age when quit school
 drop if p11 != p003 & p11 != . & p003 != . // delete observations with a sex change between November 1997 and March 1998
 gen genderconsistent9703 = (p11 == s3_4 | s3_4 == .) // these observations are gender-consistent between November 1997 and (Winter) 2003
@@ -480,7 +481,7 @@ keep if (p21 == 1 | p006 == 1 | p008 == 0) & !(p012 <= 7) // Only consider those
 														  // of primary school and who are either still enrolled in school (unless they took a break between primary and secondary school; to prevent this, I exclude 
 														  // all those students who claim to have taken a break from school for 1 or more years) or who stopped going to school less than a year ago (by March 1998).  
 
-save "$Progresa\Unconditional.dta", replace
+save "$Intermediate\Unconditional.dta", replace
 
 // export for R
 global features97 "female age97 attend97 attend98 hhsize97 numunder15 fatherathome motherathome fatherlit motherlit fatherschool motherschool fatherminprim motherminprim fatherminsec motherminsec fatherminhigh motherminhigh verypoor poor notrich yycali mpcalif"
@@ -491,6 +492,6 @@ global outcomes "highschool highschool03 highschool03fin missing00 missing03 mid
 keep treatment pobre $outcomes $features97 $features98m $locationfeatures $schoolfeatures
 drop fatherminhigh motherminhigh spendmoreon8 spendmoreon9 spendmoreon10 spendmoreon13 mayor cattlecommittee creditunion conscoop allsewers posttelegraph allgetinpreschool allgetinprimschool allgetintelesecondaria numbersecondary allgetinsecundary // drop these for lack of variation
 
-export delimited using "$Progresa\Unconditional.csv", replace
+export delimited using "$Intermediate\Unconditional.csv", replace
 
 

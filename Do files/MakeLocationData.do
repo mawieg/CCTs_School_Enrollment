@@ -1,17 +1,18 @@
 *** gen location variables
 *** Author: Martin Wiegand
-*** Last changed: 24.10.2020
+*** Last changed: 25.04.2022
 
 
 
 // set global
 clear
 set more off
-global Progresa "Directory\Progresa" // change this to Progresa directory
+global Raw "Directory\Progresa\Raw data" // change "Directory" to Progresa directory
+global Intermediate "Directory\Progresa\Intermediate data" // change "Directory" to Progresa directory
 
 
 *** get variables measuring the degree of marginalization
-use "$Progresa\1999\socioec_encel_99m.dta", clear
+use "$Raw\1999\socioec_encel_99m.dta", clear
 keep entidad mpio local grado indice
 duplicates drop entidad mpio local, force
 tempfile margi temp
@@ -19,7 +20,7 @@ save `margi'
 
 
 *** Generate location predictors from 98 October survey
-use "$Progresa\1998\bd_rur_1998_o_localidad_Stata12", clear
+use "$Raw\1998\bd_rur_1998_o_localidad_Stata12", clear
 
 // 3. Is there a...
 gen mayor = r00301 == 1 if r00301 != 9 & r00301 != . // mayor
@@ -101,7 +102,7 @@ rename cveloc local
 destring entidad, replace
 destring muni, replace
 destring local, replace
-merge 1:1 entidad muni local using "$Progresa\2003\bd_rur_2003_localidad_13oct08_Stata12.dta", nogen
+merge 1:1 entidad muni local using "$Raw\2003\bd_rur_2003_localidad_13oct08_Stata12.dta", nogen
 drop if tipo == 3
 rename muni mpio
 
@@ -300,5 +301,5 @@ global locationvars "grado indice mayor delegate subdelegate commissioner commis
 global schoolvars "ttprivsec ttpubsec tttelesec ttclosestsec ttCONALEP ttCETA ttCETIS ttCEBTA ttCEBTIS ttprivhigh ttpubhigh ttclosesthigh"
 global alllocationvars "$locationvars $schoolvars"
 keep entidad mpio local $alllocationvars 
-save "$Progresa\location", replace
+save "$Intermediate\location", replace
 
