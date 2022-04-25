@@ -5,8 +5,6 @@
 # learning for treatment and structural parameters", Econometrics Journal (2018)
 # Last changed: 23.09.2020
 
-source("ML_Functions.R") 
-
 DML <- function(data, y, d, groupvar, xx, xo, xL, methods, nfold, arguments, arguments.ens, outcomename, silent=FALSE){
 
   K         <- nfold # number of folds
