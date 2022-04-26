@@ -6,6 +6,27 @@
 # "Double/debiased machine learning for treatment and structural parameters", 
 # Econometrics Journal (2018).
 # Last changed: 26.04.2022
+#
+# In:
+# - datause, dataout: data frames (the tuning and prediction sets, respectively)
+# - y, d, r, rt, rc: character
+# - x: character (factor variables as formula)
+# - method: character (ML method to be used)
+# - plinear: double (deprecated; always 0)
+# - binary.d: double (indicator for binary treatment; always 1)
+# - binary.y: double (indicator for binary outcome)
+# - arguments: list (of hyperparameters for each ML method)
+#  
+# Out: 
+# - my_z1x, my_z0x: lists (outcome scores in predicion set)
+# - mz_x: list (propensity score in predicion set)
+# - m_rt, m_rc, m_r_t, m_r_c: lists (attrition score in prediction set)
+# - err.yz0, err.yz1, err.z, err.rt, err.rc, err.r_t, err.r_c: double (of RMSE)
+# - mis.z: double (misclassification rate of m(x))
+# - rz: list (residuals of m(x))
+# - fit.yz1out, fit.yz0out, fit.r_tout, fit.r_cout: lists (outcome and attrition 
+#     scores in prediction set separate by treatment status)
+
 
 cond_comp_mis <- function(datause, dataout, y, d, r, rt, rc, x, method, plinear, 
                           binary.d, binary.y, arguments){
@@ -69,13 +90,8 @@ cond_comp_mis <- function(datause, dataout, y, d, r, rt, rc, x, method, plinear,
     }
     
     if(binary.d==0){
-      fit.z   <- boost(datause=datause, dataout=dataout, form_x=form_x, 
-                       form_y=form_d, distribution=option[['reg_dist']], 
-                       nround=arg$nrounds.d, eta=arg$eta.d, 
-                       max.depth=arg$max_depth.d, subsample=arg$subsample.d, 
-                       colsample_bytree=arg$colsample_bytree.d, 
-                       min_child_weight=arg$min_child_weight.d)
-      mis.z   <- NA
+      # not specified, d is always binary
+      stop("The case binary.d = 0 is not specified.")
     }
     
     fit.rt    <- xg.boost(datause=datause, dataout=dataout, form_x=form_x, 
@@ -144,10 +160,8 @@ cond_comp_mis <- function(datause, dataout, y, d, r, rt, rc, x, method, plinear,
     }
     
     if(binary.d==0){
-      fit.z   <- nnetF(datause=datause, dataout=dataout, form_x=form_x, 
-                       form_y=form_d, clas=FALSE, size=arg$size.d, 
-                       decay=arg$decay.d)
-      mis.z   <- NA
+      # not specified, d is always binary
+      stop("The case binary.d = 0 is not specified.")
     }
     
     fit.y     <- 0
@@ -193,9 +207,8 @@ cond_comp_mis <- function(datause, dataout, y, d, r, rt, rc, x, method, plinear,
     }
     
     if(binary.d==0){
-      fit.z   <- rlassoF(datause=datause, dataout=dataout, form_x, form_d, post, 
-                         logit=FALSE, arg=arg)[c("yhatout", "resout")]
-      mis.z   <- NA
+      # not specified, d is always binary
+      stop("The case binary.d = 0 is not specified.")
     }   
     
     fit.y     <- 0
@@ -251,9 +264,8 @@ cond_comp_mis <- function(datause, dataout, y, d, r, rt, rc, x, method, plinear,
     }
     
     if(binary.d==0){
-      fit.z   <- RegRegF(datause=datause, dataout=dataout, form_x, form_d, 
-                         logit=FALSE, lambda=lambda, alp=alp, post=post)
-      mis.z   <- NA
+      # not specified, d is always binary
+      stop("The case binary.d = 0 is not specified.")
     }   
     
     fit.rt    <- RegRegF(datause=datause, dataout=dataout, form_x, rt, 
@@ -400,8 +412,8 @@ cond_comp_mis <- function(datause, dataout, y, d, r, rt, rc, x, method, plinear,
     }
     
     if(binary.d==0){
-      fit.z   <- RF(datause=datause, dataout=dataout, form_x=form_x, form_y=form_d,nodesize=option[["clas_nodesize"]], arg=arg, reg=TRUE, tune=tune)
-      mis.z   <- NA
+      # not specified, d is always binary
+      stop("The case binary.d = 0 is not specified.")
     }   
     
     fit.rt    <- RF(datause=datause, dataout=dataout, form_x=form_x, form_y=rt, 
@@ -450,8 +462,8 @@ cond_comp_mis <- function(datause, dataout, y, d, r, rt, rc, x, method, plinear,
     }
     
     if(binary.d==0){
-      fit.z   <- NA
-      mis.z   <- NA
+      # not specified, d is always binary
+      stop("The case binary.d = 0 is not specified.")
     }
     
     fit.rt    <- svmF(datause, dataout, form_x, rt, cost=arg$cost_rt, 

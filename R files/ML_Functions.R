@@ -6,7 +6,7 @@
 # M. Demirer, E. Duflo, C. Hansen, W. Newey, J. Robins for their paper 
 # "Double/debiased machine learning for treatment and structural parameters", 
 # Econometrics Journal (2018).
-# Last changed: 25.04.2022
+# Last changed: 26.04.2022
 
 
 # Regularized regression

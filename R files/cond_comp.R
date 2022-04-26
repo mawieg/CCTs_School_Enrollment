@@ -6,6 +6,26 @@
 # "Double/debiased machine learning for treatment and structural parameters", 
 # Econometrics Journal (2018).
 # Last changed: 26.04.2022
+#
+# In:
+# - datause, dataout: data frames (the tuning and prediction sets, respectively)
+# - y, d: character
+# - x: character (factor variables as formula)
+# - method: character (ML method to be used)
+# - plinear: double (deprecated; always 0)
+# - binary.d: double (indicator for binary treatment; always 1)
+# - binary.y: double (indicator for binary outcome)
+# - arguments: list (of hyperparameters for each ML method)
+#  
+# Out: 
+# - my_z1x, my_z0x: lists (outcome scores in predicion set)
+# - mz_x: list (propensity score in predicion set)
+# - err.yz0, err.yz1, err.z: double (of RMSE)
+# - mis.z: double (misclassification rate of m(x))
+# - rz: list (residuals of m(x))
+# - fit.yz1out, fit.yz0out: lists (outcome scores in prediction set separate by 
+#     treatment status)
+
 
 cond_comp <- function(datause, dataout, y, d, x, method, plinear, binary.d, 
                       binary.y, arguments){

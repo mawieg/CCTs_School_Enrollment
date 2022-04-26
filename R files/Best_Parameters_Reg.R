@@ -3,6 +3,19 @@
 # the respective method for the model without attrition and continuous outcomes. 
 # Author: Martin Wiegand
 # Last changed: 26.04.2022
+#
+# In:
+# - method: character (ML method to be used)
+# - data: data frame
+# - y, d, groupvar: character
+# - xvars: list of characters (denoting factor variable names)
+# - folds: double (number of folds for cross validation)
+# - reps: double (number of repetitions for cross validation)
+# - seed: double
+# 
+# Out: 
+# - para: list of hyperparameters (which ones depends on method)
+
 
 Best_Parameters_Reg <- function(method, data, y, d, groupvar, xvars, folds, 
                                 reps, seed = 1){
