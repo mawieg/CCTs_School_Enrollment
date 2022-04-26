@@ -1,22 +1,39 @@
-# This function runs the DML precedure, allowing for missing outcomes, for a number of prespecified 
-# ML methods. It produces the "result" matrix and the vector "delta.0" of relative importances. 
-# Author: Martin Wiegand; based on code provided by V.Chernozhukov, D. Chetverikov, 
-# M. Demirer, E. Duflo, C. Hansen, W. Newey, J. Robins for their paper "Double/debiased machine 
-# learning for treatment and structural parameters", Econometrics Journal (2018)
-# Last changed: 23.09.2020
+# This function runs the DML procedure, allowing for missing outcomes, for a 
+# number of pre-specified ML methods. It produces the "result" matrix and the 
+# vector "delta.0" of relative importances. 
+# Author: Martin Wiegand 
+# Partially based on code provided by V.Chernozhukov, D. Chetverikov, 
+# M. Demirer, E. Duflo, C. Hansen, W. Newey, J. Robins for their paper 
+# "Double/debiased machine learning for treatment and structural parameters", 
+# Econometrics Journal (2018).
+# Last changed: 26.04.2022
 
 
 methods         <- c("Lasso", "Ridge", "Elnet", "Forest", "Boosting","SVM") 
 
-large.list <- foreach(ite = 1:iterations, .errorhandling='remove', .packages = c('tidyverse', 'randomForest', 'partykit', 'Matching', 'CausalGAM', 'survey', 'glmnet', 'e1071', 'caret', 'splines2', 'foreign', 'quantreg', 'mnormt', 'gbm', 'glmnet', 'MASS', 'rpart', 'doParallel', 'sandwich', 'hdm', 'matrixStats', 'quadprog', 'lsei', 'xgboost', 'groupdata2', 'multiwayvcov')) %dopar% { 
+large.list <- foreach(ite = 1:iterations, .errorhandling='remove', 
+                      .packages = c('tidyverse', 'randomForest', 'partykit', 
+                                    'Matching', 'CausalGAM', 'survey', 'glmnet', 
+                                    'e1071', 'caret', 'splines2', 'foreign', 
+                                    'quantreg', 'mnormt', 'gbm', 'glmnet', 
+                                    'MASS', 'rpart', 'doParallel', 'sandwich', 
+                                    'hdm', 'matrixStats', 'quadprog', 'lsei', 
+                                    'xgboost', 'groupdata2', 
+                                    'multiwayvcov')) %dopar% { 
   set.seed(12345+ite)
-  res <- DML_mis(databig, y, d, r, rt, rc, groupvar, xx, xo, xL, methods=methods, nfold=nfolds, arguments=arguments, arguments.ens=arguments, outcomename=outcomename, silent=FALSE)
+  res <- DML_mis(databig, y, d, r, rt, rc, groupvar, xx, xo, xL, 
+                 methods=methods, nfold=nfolds, arguments=arguments, 
+                 arguments.ens=arguments, outcomename=outcomename, silent=FALSE)
   res <- res
 }
 
 result      <- matrix(0,13, length(methods)+1)
 colnames(result) <- cbind(t(methods), "Best")
-rownames(result) <- cbind("Median ATE", "bse", "pval", "Median ATEN", "bse", "pval", "RMSE[Y|X, D=0]", "RMSE[Y|X, D=1]", "RMSE[D|X]", "RMSE[RD|X]", "RMSE[R(1-D)|X]", "RMSE[R|X, D=1]", "RMSE[R|X, D=0]")
+rownames(result) <- cbind("Median ATE", "bse", "pval", 
+                          "Median ATEN", "bse", "pval", 
+                          "RMSE[Y|X, D=0]", "RMSE[Y|X, D=1]", "RMSE[D|X]", 
+                          "RMSE[RD|X]", "RMSE[R(1-D)|X]", "RMSE[R|X, D=1]", 
+                          "RMSE[R|X, D=0]")
 
 N <- dim(databig)[1]
 M <- length(methods)
@@ -36,9 +53,13 @@ for (k in 1:(M+1)) {
     epsilon.TE <- TE.mat[,ite] - mean(TE.mat[,ite], na.rm = TRUE)
     epsilon.TEN <- TEN.mat[,ite] - mean(TEN.mat[,ite], na.rm = TRUE)
     for (run in 1:runs.per.ite) {
-      mammen.draw <- rbernoulli(n = max(groups), p = (sqrt(5)-1)/(2*sqrt(5))) * sqrt(5) + (1-sqrt(5))/2
-      boot.sample.TE <- mean(TE.mat[,ite], na.rm = TRUE) + epsilon.TE*mammen.draw[groups]
-      boot.sample.TEN <- mean(TEN.mat[,ite], na.rm = TRUE) + epsilon.TEN*mammen.draw[groups]
+      mammen.draw <- 
+        rbernoulli(n = max(groups), 
+                   p = (sqrt(5)-1)/(2*sqrt(5))) * sqrt(5) + (1-sqrt(5))/2
+      boot.sample.TE <- 
+        mean(TE.mat[,ite], na.rm = TRUE) + epsilon.TE*mammen.draw[groups]
+      boot.sample.TEN <- 
+        mean(TEN.mat[,ite], na.rm = TRUE) + epsilon.TEN*mammen.draw[groups]
       TE.boot[(ite-1)*runs.per.ite+run] <- mean(boot.sample.TE, na.rm = TRUE)
       TEN.boot[(ite-1)*runs.per.ite+run] <- mean(boot.sample.TEN, na.rm = TRUE)
     }
@@ -46,8 +67,12 @@ for (k in 1:(M+1)) {
   
   var.TE <- var.TEN <- rep(0,iterations)
   for (ite in 1:iterations) {
-    var.TE[ite] <- var(TE.boot[((ite-1)*runs.per.ite+1):(ite*runs.per.ite)]) + (median(TE.boot[((ite-1)*runs.per.ite+1):(ite*runs.per.ite)]) - median(TE.boot))^2
-    var.TEN[ite] <- var(TEN.boot[((ite-1)*runs.per.ite+1):(ite*runs.per.ite)]) + (median(TEN.boot[((ite-1)*runs.per.ite+1):(ite*runs.per.ite)]) - median(TEN.boot))^2
+    var.TE[ite] <- var(TE.boot[((ite-1)*runs.per.ite+1):(ite*runs.per.ite)]) + 
+      (median(TE.boot[((ite-1)*runs.per.ite+1):(ite*runs.per.ite)]) - 
+         median(TE.boot))^2
+    var.TEN[ite] <- var(TEN.boot[((ite-1)*runs.per.ite+1):(ite*runs.per.ite)]) + 
+      (median(TEN.boot[((ite-1)*runs.per.ite+1):(ite*runs.per.ite)]) - 
+         median(TEN.boot))^2
   }
   
   result[1,k] <- median(colMeans(TE.mat, na.rm = TRUE))
@@ -97,7 +122,8 @@ for (ite in 1:iterations) {
   }
 }
 r2.max <- c(2*r2.y[(M+1)], 3*r2.y[(M+1)], 4*r2.y[(M+1)], 5*r2.y[(M+1)], 1)
-delta.0 <- theta.best/(theta.simple-theta.best)*(r2.y[(M+1)]-r2.simple)/(r2.max-r2.y[(M+1)])
+delta.0 <- theta.best/(theta.simple-theta.best) * 
+  (r2.y[(M+1)]-r2.simple)/(r2.max-r2.y[(M+1)])
 
 # Also compute R2 for treatment status
 r2.d <- rep(0,(M+1))
