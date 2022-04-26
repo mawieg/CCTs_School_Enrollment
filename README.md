@@ -1,8 +1,6 @@
 # Do Early-ending Conditional Cash Transfer Programs Discourage Continued School Enrollment?
 
-This repo contains .do files, .R files, and (intermediate) datasets for the analysis in my paper "Do Early-ending 
-Conditional Cash Transfer Programs Discourage Continued School Enrollment?". A working paper version is available
-at https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3429762. 
+This repo contains .do files, .R files, and (intermediate) datasets for the analysis in my paper "Do Early-ending Conditional Cash Transfer Programs Discourage Continued School Enrollment?". A working paper version is available at https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3429762. 
 
 The raw data comes from the website https://evaluacion.prospera.gob.mx/en/eval_cuant/p_bases_cuanti.php, which was 
 no longer available at the time of writing. 
@@ -41,7 +39,6 @@ vector "delta.0".
 │
 ├── Intermediate data <- Contains .csv files used for analysis
 │
-
 ```
 
 
