@@ -66,6 +66,12 @@ target/
 # dta files
 *.dta
 
+# html files
+*.html
+
+# R history files
+*.Rhistory
+
 # Pycharm
 .idea
 
