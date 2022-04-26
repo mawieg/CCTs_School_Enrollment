@@ -4,7 +4,7 @@ This repo contains .do files, .R files, and (intermediate) datasets for the anal
 
 The raw data comes from the website https://evaluacion.prospera.gob.mx/en/eval_cuant/p_bases_cuanti.php, which was no longer accessible at the time of writing. 
 
-## How to run it
+## How to run it 
 
 To merge the various survey rounds, define relevant variables, and construct datasets for analysis in R, go to the 'Do files' folder, open "MakeDataset.do" in Stata, change the directory to the adress of the repository folder, and run. The location-specific variables are constructed in a separate file, "MakeLocationData.do". To run this, change the directory to the adress of the repository folder first. The resulting datasets are available in the "Intermediate data" folder. 
 
