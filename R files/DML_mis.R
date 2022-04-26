@@ -7,9 +7,29 @@
 # "Double/debiased machine learning for treatment and structural parameters", 
 # Econometrics Journal (2018).
 # Last changed: 26.04.2022
+#
+# In:
+# - data: data frame
+# - y, d, r, rt, rc, groupvar: character
+# - xx, xo, xL: lists of characters (denoting factor variable names)
+# - methods: list of characters (ML methods to be used)
+# - nfold: double (number of folds for cross-fitting)
+# - arguments: list (of hyperparameters for each ML method)
+# - outcomename: character
+# - silent: logical
+#  
+# Out: 
+# - TE, TET, TEN: matrices with #students rows and #MLmethods columns 
+#     (containing individual treatment effects for each student and ML method)
+# - groupout: list (of group IDs)
+# - RMSE: matrix with #nuisancefunctions rows and #MLmethods columns
+# - R.squared.y, R.squared.d, R.squared.r: lists (of R2 for each ML method)
+# - keepvec, trimvec: lists (containing for each ML method the number of kept
+#     observations after trimming and the trim cutoff, respectively)
+
 
 DML_mis <- function(data, y, d, r, rt, rc, groupvar, xx, xo, xL, methods, nfold, 
-                    arguments, arguments.ens, outcomename, silent=FALSE){
+                    arguments, outcomename, silent=FALSE){
 
   K         <- nfold # number of folds
   M         <- length(methods)

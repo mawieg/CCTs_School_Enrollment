@@ -23,7 +23,7 @@ large.list <- foreach(ite = 1:iterations, .errorhandling='remove',
   set.seed(12345+ite)
   res <- DML_mis(databig, y, d, r, rt, rc, groupvar, xx, xo, xL, 
                  methods=methods, nfold=nfolds, arguments=arguments, 
-                 arguments.ens=arguments, outcomename=outcomename, silent=FALSE)
+                 outcomename=outcomename, silent=FALSE)
   res <- res
 }
 

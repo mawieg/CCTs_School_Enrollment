@@ -22,8 +22,7 @@ large.list <- foreach(ite = 1:iterations, .errorhandling='remove',
                                     'multiwayvcov')) %dopar% { 
   set.seed(12345+ite)
   res <- DML(databig, y, d, groupvar, xx, xo, xL, methods=methods, nfold=nfolds, 
-             arguments=arguments, arguments.ens=arguments, 
-             outcomename=outcomename, silent=FALSE)
+             arguments=arguments, outcomename=outcomename, silent=FALSE)
   res <- res
 }
 
